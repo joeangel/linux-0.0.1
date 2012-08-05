@@ -14,10 +14,10 @@
  * won't be any messing with the stack from main(), but we define
  * some others too.
  */
-static inline _syscall0(int,fork)
-static inline _syscall0(int,pause)
-static inline _syscall0(int,setup)
-static inline _syscall0(int,sync)
+inline _syscall0(int,fork)
+inline _syscall0(int,pause)
+inline _syscall0(int,setup)
+inline _syscall0(int,sync)
 
 #include <linux/tty.h>
 #include <linux/sched.h>

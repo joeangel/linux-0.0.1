@@ -6,8 +6,8 @@
  * the page directory.
  */
 .text
-.globl _idt,_gdt,_pg_dir
-_pg_dir:
+.globl idt,gdt,pg_dir
+pg_dir:
 startup_32:
 	movl $0x10,%eax
 	mov %ax,%ds
@@ -53,7 +53,7 @@ setup_idt:
 	movw %dx,%ax		/* selector = 0x0008 = cs */
 	movw $0x8E00,%dx	/* interrupt gate - dpl=0, present */
 
-	lea _idt,%edi
+	lea idt,%edi
 	mov $256,%ecx
 rp_sidt:
 	movl %eax,(%edi)
@@ -102,7 +102,7 @@ L6:
 				# just in case, we know what happens.
 
 /* This is the default interrupt "handler" :-) */
-.align 2
+.align 4
 ignore_int:
 	incb 0xb8000+160		# put something on the screen
 	movb $2,0xb8000+161		# so that we know something
@@ -133,14 +133,14 @@ ignore_int:
  * some kind of marker at them (search for "8Mb"), but I
  * won't guarantee that's all :-( )
  */
-.align 2
+.align 4
 setup_paging:
 	movl $1024*3,%ecx
 	xorl %eax,%eax
 	xorl %edi,%edi			/* pg_dir is at 0x000 */
 	cld;rep;stosl
-	movl $pg0+7,_pg_dir		/* set present bit/user r/w */
-	movl $pg1+7,_pg_dir+4		/*  --------- " " --------- */
+	movl $pg0+7,pg_dir		/* set present bit/user r/w */
+	movl $pg1+7,pg_dir+4		/*  --------- " " --------- */
 	movl $pg1+4092,%edi
 	movl $0x7ff007,%eax		/*  8Mb - 4096 + 7 (r/w user,p) */
 	std
@@ -154,21 +154,21 @@ setup_paging:
 	movl %eax,%cr0		/* set paging (PG) bit */
 	ret			/* this also flushes prefetch-queue */
 
-.align 2
+.align 4
 .word 0
 idt_descr:
 	.word 256*8-1		# idt contains 256 entries
-	.long _idt
-.align 2
+	.long idt
+.align 4
 .word 0
 gdt_descr:
 	.word 256*8-1		# so does gdt (not that that's any
-	.long _gdt		# magic number, but it works for me :^)
+	.long gdt		# magic number, but it works for me :^)
 
-	.align 3
-_idt:	.fill 256,8,0		# idt is uninitialized
+	.align 8
+idt:	.fill 256,8,0		# idt is uninitialized
 
-_gdt:	.quad 0x0000000000000000	/* NULL descriptor */
+gdt:	.quad 0x0000000000000000	/* NULL descriptor */
 	.quad 0x00c09a00000007ff	/* 8Mb */
 	.quad 0x00c09200000007ff	/* 8Mb */
 	.quad 0x0000000000000000	/* TEMPORARY - don't use */
