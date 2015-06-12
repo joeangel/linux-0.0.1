@@ -4,7 +4,7 @@
 *.o
 
 # Compiled Dynamic libraries
-*.so
+*.sopo
 
 # Compiled Static libraries
 *.lai
